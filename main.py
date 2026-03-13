@@ -7,6 +7,7 @@ from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 def setup_components():
@@ -35,13 +36,13 @@ def setup_components():
     )
 
 
-def read_webpage():
+def read_webpage(url):
     # Only keep post title, headers, and content from the full HTML.
     bs4_strainer = bs4.SoupStrainer(
         class_=("post-title", "post-header", "post-content")
     )
     loader = WebBaseLoader(
-        web_paths=("https://lilianweng.github.io/posts/2023-06-23-agent/",),
+        web_paths=(url,),
         bs_kwargs={"parse_only": bs4_strainer},
     )
     docs = loader.load()
@@ -49,12 +50,25 @@ def read_webpage():
     assert len(docs) == 1
     print(f"Total characters: {len(docs[0].page_content)}")
     print(docs[0].page_content[:500])
+    return docs
+
+
+def split_into_chunks(docs):
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=1000,  # chunk size (characters)
+        chunk_overlap=200,  # chunk overlap (characters)
+        add_start_index=True,  # track index in original document
+    )
+    all_splits = text_splitter.split_documents(docs)
+    print(f"Split blog post into {len(all_splits)} sub-documents.")
+    return all_splits
 
 
 def main():
     print("Hello from rag-agent!")
     # setup_components()
-    read_webpage()
+    docs = read_webpage("https://lilianweng.github.io/posts/2023-06-23-agent/")
+    chunks = split_into_chunks(docs)
 
 
 if __name__ == "__main__":
