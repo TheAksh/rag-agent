@@ -35,8 +35,7 @@ def setup_components():
     )
 
 
-def main():
-    print("Hello from rag-agent!")
+def read_webpage():
     # Only keep post title, headers, and content from the full HTML.
     bs4_strainer = bs4.SoupStrainer(
         class_=("post-title", "post-header", "post-content")
@@ -50,6 +49,12 @@ def main():
     assert len(docs) == 1
     print(f"Total characters: {len(docs[0].page_content)}")
     print(docs[0].page_content[:500])
+
+
+def main():
+    print("Hello from rag-agent!")
+    # setup_components()
+    read_webpage()
 
 
 if __name__ == "__main__":
