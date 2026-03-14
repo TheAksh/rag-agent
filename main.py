@@ -14,7 +14,6 @@ from langchain.agents import create_agent
 
 def setup_components():
     os.environ["LANGSMITH_TRACING"] = "true"
-    # os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
     if not os.environ.get("LANGSMITH_API_KEY"):
         os.environ["LANGSMITH_API_KEY"] = getpass.getpass(
             "Enter API key for LangSmith: "
@@ -122,10 +121,7 @@ def main():
     agent = create_agent(model)
 
     # Custom user query
-    query = (
-        "What is the standard method for Task Decomposition?\n\n"
-        "Once you get the answer, look up common extensions of that method."
-    )
+    query = input("Enter your query here:\n")
 
     for event in agent.stream(
         {"messages": [{"role": "user", "content": query}]},
