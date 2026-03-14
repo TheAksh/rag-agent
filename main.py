@@ -9,10 +9,9 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-
 def setup_components():
     os.environ["LANGSMITH_TRACING"] = "true"
-    os.environ["LANGSMITH_API_KEgY"] = getpass.getpass()
+    os.environ["LANGSMITH_API_KEY"] = getpass.getpass()
     if not os.environ.get("GOOGLE_API_KEY"):
         os.environ["GOOGLE_API_KEY"] = getpass.getpass(
             "Enter API key for Google Gemini: "
@@ -34,6 +33,7 @@ def setup_components():
         docstore=InMemoryDocstore(),
         index_to_docstore_id={},
     )
+    return vector_store
 
 
 def read_webpage(url):
@@ -64,11 +64,27 @@ def split_into_chunks(docs):
     return all_splits
 
 
+def store_chunks(vector_store, chunks):
+    document_ids = vector_store.add_documents(chunks)
+    print("Stored chunks in vector store.")
+    print(document_ids[:3])
+    return document_ids
+
+
 def main():
     print("Hello from rag-agent!")
-    # setup_components()
+
+    # Initialize components - chat model, embeddings model and vector store
+    vector_store = setup_components()
+
+    # Load the contents of the provided URL
     docs = read_webpage("https://lilianweng.github.io/posts/2023-06-23-agent/")
+
+    # Split the loaded content into smaller chunks
     chunks = split_into_chunks(docs)
+
+    # Store the chunks in the vector store
+    document_ids = store_chunks(vector_store, chunks)
 
 
 if __name__ == "__main__":
